@@ -1,0 +1,2 @@
+[workspace]
+members = [ "poker-client", "poker-common","poker-server"]

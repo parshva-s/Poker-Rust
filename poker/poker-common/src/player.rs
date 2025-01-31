@@ -84,4 +84,11 @@ impl Player {
         self.player_stats.games_played += 1;
     }
 
+    fn reset_stats(&mut self) {
+        self.player_stats.games_played = 0;
+        self.player_stats.games_won = 0;
+        self.player_stats.games_lost = 0;
+        self.player_stats.games_folded = 0;
+        self.player_stats.total_chips_won = 0;
+    }
 }

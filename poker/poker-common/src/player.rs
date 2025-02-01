@@ -25,7 +25,7 @@ impl Player {
             id,
             total_chips,
             current_bet: 0,
-            is_active: true,
+            is_active: false,
         }
     }
 
@@ -92,3 +92,21 @@ impl Player {
         self.player_stats.total_chips_won = 0;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::game::Game;
+    use crate::player::Player;
+    use crate::stats::PlayerStats;
+
+    #[test]
+    fn test_player_new() {
+        let mut player = Player::new("John", 1, 1000);
+        assert_eq!(player.get_name(), "John");
+        assert_eq!(player.get_total_chips(), 1000);
+        assert_eq!(player.is_active(), false);
+    }
+}
+
+

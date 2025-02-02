@@ -1,5 +1,11 @@
+use std::cmp::Ordering;
+use std::collections::HashMap;
 
-pub struct FiveDrawDealer{
+use poker_common::card::{Card, Suit, Value};
+use poker_common::player::Player;
+use poker_common::game::{GameSession, Game};
+
+pub struct FiveDrawDealer {
     deck: Vec<Card>,
     dealer_hand: Vec<Card>,
     players: Vec<Player>,
@@ -17,6 +23,7 @@ impl FiveDrawDealer
             deck: Vec::new(),
             players: Vec::new(),
             discard: Vec::new(),
+            dealer_hand: Vec::new(),
             pot: 0,
             current_bet: 0,
             current_player: 0,

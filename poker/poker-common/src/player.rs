@@ -1,5 +1,5 @@
 use crate::game::Game;
-use crate::card::Card;
+use crate::card::{Card, Suit, Value};
 
 pub struct Player {
     name: String,
@@ -21,7 +21,7 @@ pub struct Stats {
 }
 
 impl Player {
-    fn new(name: String, id: u32, total_chips: u32) -> Player {
+    pub fn new(name: String, id: u32, total_chips: u32) -> Player {
         Player {
             name,
             hand: Vec::new(),
@@ -76,6 +76,23 @@ impl Player {
 
     pub fn set_active(&mut self, active: bool) {
         self.is_active = active;
+    }
+
+    pub fn add_card(&mut self, card: Card) {
+        self.hand.push(card);
+    }
+
+    pub fn clear_hand(&mut self) {
+        self.hand.clear();
+    }
+
+    pub fn remove_card(&mut self, suit: Suit, value: Value) -> bool{
+        let index = self.hand.iter().position(|card| card.suit == suit && card.value == value);
+        if let Some(index) = index {
+            self.hand.remove(index);
+            return true;
+        }
+        return false;
     }
 
     pub fn game_won(&mut self, chips: u32) {

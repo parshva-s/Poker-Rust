@@ -127,3 +127,164 @@ impl FiveDrawDealer
         }
     }    
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poker_common::card::{Card, Suit, Value};
+    use poker_common::player::Player;
+
+    #[test]
+    fn test_evaluate_hand() {
+        let player1 = Player::new("John".to_owned(), 1, 1000);
+        let player2 = Player::new("Jane".to_owned(), 2, 1000);
+        let player3 = Player::new("Bob".to_owned(), 3, 1000);
+
+        let mut dealer = FiveDrawDealer::new();
+        dealer.add_player(player1);
+        dealer.add_player(player2);
+        dealer.add_player(player3);
+
+        // give player 1 a pair of 2s and 3 random cards
+        dealer.players[0].add_card(Card {suit: Suit::Hearts, value: Value::Two});
+        dealer.players[0].add_card(Card {suit: Suit::Diamonds, value: Value::Two});
+        dealer.players[0].add_card(Card {suit: Suit::Clubs, value: Value::Five});
+        dealer.players[0].add_card(Card {suit: Suit::Spades, value: Value::Nine});
+        dealer.players[0].add_card(Card {suit: Suit::Hearts, value: Value::King});
+
+        // give player 2 a pair of 3s and 3 random cards
+        dealer.players[1].add_card(Card {suit: Suit::Diamonds, value: Value::Three});
+        dealer.players[1].add_card(Card {suit: Suit::Clubs, value: Value::Three});
+        dealer.players[1].add_card(Card {suit: Suit::Spades, value: Value::Eight});
+        dealer.players[1].add_card(Card {suit: Suit::Hearts, value: Value::Four});
+        dealer.players[1].add_card(Card {suit: Suit::Diamonds, value: Value::Seven});
+
+        // give player 3 a pair of 4s and 3 random cards
+        dealer.players[2].add_card(Card {suit: Suit::Clubs, value: Value::Four});
+        dealer.players[2].add_card(Card {suit: Suit::Spades, value: Value::Four});
+        dealer.players[2].add_card(Card {suit: Suit::Hearts, value: Value::Ten});
+        dealer.players[2].add_card(Card {suit: Suit::Diamonds, value: Value::Six});
+        dealer.players[2].add_card(Card {suit: Suit::Clubs, value: Value::Queen});
+
+        let winner = dealer.check_for_winning_hand();
+        assert_eq!(winner.len(), 1);
+        assert_eq!(winner[0].get_name(), "Bob");
+    }
+
+    #[test]
+    fn evaluate_same_hand() {
+        let player1 = Player::new("John".to_owned(), 1, 1000);
+        let player2 = Player::new("Jane".to_owned(), 2, 1000);
+        let player3 = Player::new("Bob".to_owned(), 3, 1000);
+
+        let mut dealer = FiveDrawDealer::new();
+
+        dealer.add_player(player1);
+        dealer.add_player(player2);
+        dealer.add_player(player3);
+
+        // give player 1 a pair of 2s and 3 random cards
+        dealer.players[0].add_card(Card {suit: Suit::Hearts, value: Value::Two});
+        dealer.players[0].add_card(Card {suit: Suit::Diamonds, value: Value::Two});
+        dealer.players[0].add_card(Card {suit: Suit::Clubs, value: Value::Five});
+        dealer.players[0].add_card(Card {suit: Suit::Spades, value: Value::Nine});
+        dealer.players[0].add_card(Card {suit: Suit::Hearts, value: Value::King});
+
+        // give player 2 a pair of 2s and 3 random cards
+        dealer.players[1].add_card(Card {suit: Suit::Spades, value: Value::Two});
+        dealer.players[1].add_card(Card {suit: Suit::Clubs, value: Value::Two});
+        dealer.players[1].add_card(Card {suit: Suit::Hearts, value: Value::Five});
+        dealer.players[1].add_card(Card {suit: Suit::Diamonds, value: Value::Nine});
+        dealer.players[1].add_card(Card {suit: Suit::Spades, value: Value::King});
+
+        // give player 3 a pair of 5 random cards
+        dealer.players[2].add_card(Card {suit: Suit::Hearts, value: Value::Three});
+        dealer.players[2].add_card(Card {suit: Suit::Diamonds, value: Value::Four});
+        dealer.players[2].add_card(Card {suit: Suit::Clubs, value: Value::Five});
+        dealer.players[2].add_card(Card {suit: Suit::Spades, value: Value::Six});
+        dealer.players[2].add_card(Card {suit: Suit::Hearts, value: Value::Eight});
+
+        let winner = dealer.check_for_winning_hand();
+        assert_eq!(winner.len(), 2);
+        assert_eq!(winner[0].get_name(), "John");
+        assert_eq!(winner[1].get_name(), "Jane");
+    }
+
+    #[test]
+    fn evaluate_no_winning_hand() {
+        let player1 = Player::new("John".to_owned(), 1, 1000);
+        let player2 = Player::new("Jane".to_owned(), 2, 1000);
+        let player3 = Player::new("Bob".to_owned(), 3, 1000);
+
+        let mut dealer = FiveDrawDealer::new();
+
+        dealer.add_player(player1);
+        dealer.add_player(player2);
+        dealer.add_player(player3);
+
+        // give player 1 a pair of 2s and 3 random cards
+        dealer.players[0].add_card(Card {suit: Suit::Hearts, value: Value::Two});
+        dealer.players[0].add_card(Card {suit: Suit::Diamonds, value: Value::Two});
+        dealer.players[0].add_card(Card {suit: Suit::Clubs, value: Value::Five});
+        dealer.players[0].add_card(Card {suit: Suit::Spades, value: Value::Nine});
+        dealer.players[0].add_card(Card {suit: Suit::Hearts, value: Value::King});
+
+        // give player 2 a pair of 2s and 3 random cards
+        dealer.players[1].add_card(Card {suit: Suit::Spades, value: Value::Two});
+        dealer.players[1].add_card(Card {suit: Suit::Clubs, value: Value::Two});
+        dealer.players[1].add_card(Card {suit: Suit::Hearts, value: Value::Five});
+        dealer.players[1].add_card(Card {suit: Suit::Diamonds, value: Value::Nine});
+        dealer.players[1].add_card(Card {suit: Suit::Spades, value: Value::Queen});
+
+        // give player 3 a pair of 5 random cards
+        dealer.players[2].add_card(Card {suit: Suit::Hearts, value: Value::Three});
+        dealer.players[2].add_card(Card {suit: Suit::Diamonds, value: Value::Four});
+        dealer.players[2].add_card(Card {suit: Suit::Clubs, value: Value::Five});
+        dealer.players[2].add_card(Card {suit: Suit::Spades, value: Value::Six});
+        dealer.players[2].add_card(Card {suit: Suit::Hearts, value: Value::Eight});
+
+        let winner = dealer.check_for_winning_hand();
+        assert_eq!(winner.len(), 1);
+        assert_eq!(winner[0].get_name(), "John");
+    }
+
+    #[test]
+    fn evaluate_royal_flush_vs_straight_flush() {
+        let player1 = Player::new("John".to_owned(), 1, 1000);
+        let player2 = Player::new("Jane".to_owned(), 2, 1000);
+        let player3 = Player::new("Bob".to_owned(), 3, 1000);
+
+        let mut dealer = FiveDrawDealer::new();
+
+        dealer.add_player(player1);
+        dealer.add_player(player2);
+        dealer.add_player(player3);
+
+        // give player 1 a pair of 2s and 3 random cards
+        dealer.players[1].add_card(Card {suit: Suit::Hearts, value: Value::Ten});
+        dealer.players[1].add_card(Card {suit: Suit::Hearts, value: Value::Queen});
+        dealer.players[1].add_card(Card {suit: Suit::Hearts, value: Value::King});
+        dealer.players[1].add_card(Card {suit: Suit::Hearts, value: Value::Jack});
+        dealer.players[1].add_card(Card {suit: Suit::Hearts, value: Value::Ace});
+
+        // give player 2 a pair of 2s and 3 random cards
+        dealer.players[0].add_card(Card {suit: Suit::Spades, value: Value::King});
+        dealer.players[0].add_card(Card {suit: Suit::Spades, value: Value::Ten});
+        dealer.players[0].add_card(Card {suit: Suit::Spades, value: Value::Nine});
+        dealer.players[0].add_card(Card {suit: Suit::Spades, value: Value::Jack});
+        dealer.players[0].add_card(Card {suit: Suit::Spades, value: Value::Queen});
+
+        // give player 3 a pair of 5 random cards
+        dealer.players[2].add_card(Card {suit: Suit::Hearts, value: Value::Three});
+        dealer.players[2].add_card(Card {suit: Suit::Diamonds, value: Value::Four});
+        dealer.players[2].add_card(Card {suit: Suit::Clubs, value: Value::Five});
+        dealer.players[2].add_card(Card {suit: Suit::Spades, value: Value::Six});
+        dealer.players[2].add_card(Card {suit: Suit::Hearts, value: Value::Seven});
+
+        let winner = dealer.check_for_winning_hand();
+        assert_eq!(winner.len(), 1);
+        assert_eq!(winner[0].get_name(), "Jane");
+    }
+
+}
+

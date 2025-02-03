@@ -1,6 +1,9 @@
 use std::net::{TcpStream, TcpListener};
 use std::io::{Read, Write};
 
+#[cfg(test)]
+pub mod dealer;
+
 fn game_session_selection(stream: &mut TcpStream)
 {
     // TODO: implement game session selection by spawning all games that are available with current players in the game

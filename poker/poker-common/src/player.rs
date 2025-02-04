@@ -7,9 +7,16 @@ pub struct Player {
     id: u32,
     total_chips: u32,
     current_bet: u32,
-    is_active: bool,
+    player_status: PlayerStatus,
     games_played: Vec<Game>,
     player_stats: Stats,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum PlayerStatus {
+    Active,
+    Inactive,
+    Folded,
 }
 
 pub struct Stats {
@@ -36,7 +43,7 @@ impl Player {
                 games_folded: 0,
                 total_chips_won: 0,
             },
-            is_active: false,
+            player_status: PlayerStatus::Inactive,
         }
     }
 
@@ -53,15 +60,27 @@ impl Player {
         self.total_chips
     }
 
-    pub fn is_active(&self) -> bool {
-        self.is_active
-    }
-
     pub fn get_stats(&self) -> &Stats {
         &self.player_stats
     }
 
+    pub fn get_status(&self) -> &PlayerStatus {
+        &self.player_status
+    }
+
     // SETTERS
+    pub fn joined_table(&mut self) {
+        self.player_status = PlayerStatus::Active;
+    }
+
+    pub fn fold(&mut self) {
+        self.player_status = PlayerStatus::Folded;
+    }
+
+    pub fn set_inactive(&mut self) {
+        self.player_status = PlayerStatus::Inactive;
+    }
+
     pub fn add_game(&mut self, game: Game) {
         self.games_played.push(game);
     }
@@ -72,10 +91,6 @@ impl Player {
 
     pub fn remove_chips(&mut self, chips: u32) {
         self.total_chips -= chips;
-    }
-
-    pub fn set_active(&mut self, active: bool) {
-        self.is_active = active;
     }
 
     pub fn add_card(&mut self, card: Card) {
@@ -124,16 +139,14 @@ impl Player {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::game::Game;
-    use crate::player::Player;
-    use crate::player::Stats;
+    use crate::player::{Player, PlayerStatus};
 
     #[test]
     fn test_player_new() {
         let player = Player::new("John".to_owned(), 1, 1000);
         assert_eq!(player.get_name(), "John");
         assert_eq!(player.get_total_chips(), 1000);
-        assert_eq!(player.is_active(), false);
+        assert_eq!(*player.get_status(), PlayerStatus::Inactive);
     }
 }
 

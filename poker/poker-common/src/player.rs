@@ -74,10 +74,16 @@ impl Player {
     }
 
     pub fn fold(&mut self) {
+        self.remove_chips(self.current_bet);
+        self.game_folded_stats();
+        self.current_bet = 0;
         self.player_status = PlayerStatus::Folded;
     }
 
     pub fn set_inactive(&mut self) {
+        if self.player_status == PlayerStatus::Active {
+            self.fold();
+        }
         self.player_status = PlayerStatus::Inactive;
     }
 
@@ -110,19 +116,35 @@ impl Player {
         return false;
     }
 
+    pub fn validate_bet(&self, chips: u32) -> bool {
+        if chips > self.total_chips {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    pub fn bet_chips(&mut self, chips: u32) {
+        if !self.validate_bet(chips) {
+            println!("Player does not have enough chips to bet");
+            return;
+        }
+        self.current_bet += chips;
+        self.remove_chips(chips);
+    }
+
     pub fn game_won(&mut self, chips: u32) {
         self.player_stats.games_won += 1;
-        self.player_stats.total_chips_won += chips;
         self.add_chips(chips);
         self.player_stats.games_played += 1;
     }
 
-    pub fn game_lost(&mut self) {
+    pub fn game_lost_stats(&mut self) {
         self.player_stats.games_lost += 1;
         self.player_stats.games_played += 1;
     }
 
-    pub fn game_folded(&mut self) {
+    pub fn game_folded_stats(&mut self) {
         self.player_stats.games_folded += 1;
         self.player_stats.games_played += 1;
     }
@@ -147,6 +169,13 @@ mod tests {
         assert_eq!(player.get_name(), "John");
         assert_eq!(player.get_total_chips(), 1000);
         assert_eq!(*player.get_status(), PlayerStatus::Inactive);
+    }
+
+    #[test]
+    fn test_player_joined_table() {
+        let mut player = Player::new("John".to_owned(), 1, 1000);
+        player.joined_table();
+        assert_eq!(*player.get_status(), PlayerStatus::Active);
     }
 }
 

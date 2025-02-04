@@ -1,18 +1,22 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
+use rand::prelude::*;
 
 use poker_common::card::{Card, Suit, Value};
-use poker_common::player::Player;
+use poker_common::player::{Player};
 use poker_common::game::{GameSession, Game};
 
 pub struct FiveDrawDealer {
     deck: Vec<Card>,
+    cards_in_deck: u32,
+    small_blind: u32,
+    big_blind: u32,
     dealer_hand: Vec<Card>,
     players: Vec<Player>,
-    discard: Vec<Card>,
     pot: u32,
     current_bet: u32,
     current_player: u32,
+    last_bet_player: u32,
     round: u32,
 }
 
@@ -22,13 +26,80 @@ impl FiveDrawDealer
         FiveDrawDealer {
             deck: Vec::new(),
             players: Vec::new(),
-            discard: Vec::new(),
             dealer_hand: Vec::new(),
             pot: 0,
+            small_blind: 0,
+            big_blind: 1,
             current_bet: 0,
             current_player: 0,
             round: 0,
+            last_bet_player: 0,
+            cards_in_deck: 52,
         }
+    }
+
+    pub fn start_game(&mut self) {
+        self.round += 1;
+
+        self.create_deck();
+        self.deal_initial_hand();
+        
+        self.small_blind = self.big_blind % self.players.len() as u32;
+        self.big_blind = (self.big_blind + 1) % self.players.len() as u32;
+        self.last_bet_player = self.big_blind;
+
+        // make all players active
+        for player in self.players.iter_mut() {
+            player.joined_table();
+        }
+
+        self.current_player = (self.big_blind + 1) % self.players.len() as u32;
+    }
+
+    pub fn deal_initial_hand(&mut self) {
+        if self.players.len() < 2 {
+            return; // No players, nothing to deal
+        }
+    
+        // Ensure the deck is created and shuffled before dealing
+        self.create_deck();
+        let mut rng = rand::thread_rng();
+        self.deck.shuffle(&mut rng);
+    
+        // Collect mutable references to players to avoid multiple mutable borrows of `self`
+        let mut player_refs: Vec<*mut Player> = self.players.iter_mut().map(|p| p as *mut Player).collect();
+
+        // Deal five cards to each player using deal_card method
+        for _ in 0..5 {
+            for &player_ptr in &player_refs {
+                let player = unsafe { &mut *player_ptr };
+                self.deal_card(player);
+            }
+        }
+    }
+
+    pub fn create_deck(&mut self) {
+        self.deck.clear();
+        for suit in &[Suit::Hearts, Suit::Diamonds, Suit::Clubs, Suit::Spades] {
+            for value in &[Value::Two, Value::Three, Value::Four, Value::Five, Value::Six, Value::Seven, Value::Eight, Value::Nine, Value::Ten, Value::Jack, Value::Queen, Value::King, Value::Ace] {
+                self.deck.push(Card {suit: suit.clone(), value: value.clone()});
+            }
+        }
+        self.cards_in_deck = 52;
+    }
+
+    pub fn deal_card(&mut self, player: &mut Player) -> Option<Card> {
+        if self.cards_in_deck == 0 {
+            return None;
+        }
+
+        // pop a random card from the deck and give it to the player
+        let random_index = rand::thread_rng().gen_range(0, self.deck.len());
+        let card = self.deck.remove(random_index);
+
+        player.add_card(card.clone());
+        self.cards_in_deck -= 1;
+        Some(card)
     }
 
     pub fn add_player(&mut self, player: Player) {
